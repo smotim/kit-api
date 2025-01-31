@@ -12,8 +12,8 @@ rebuild:
 
 .PHONY: install
 install:
-	docker exec dpd-api_workspace npm install
+	docker exec laravel_app npm install
 
 .PHONY: bash
 bash:
-	docker exec -it dpd-api_workspace bash
+	docker exec -it laravel_app bash

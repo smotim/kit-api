@@ -8,9 +8,18 @@
     "require": {
         "php": "^8.2",
         "laravel/framework": "^11.31",
+        "symfony/finder": "^7.0.7",
         "laravel/tinker": "^2.9",
         "mongodb/laravel-mongodb": "^5.1",
+        "kitdelivery/sdk-kit-api": "dev-main"
+
     },
+        "repositories": [
+            {
+                "type": "vcs",
+                "url": "https://github.com/smotim/sdk-kit-api"
+            }
+        ],
     "require-dev": {
         "fakerphp/faker": "^1.23",
         "laravel/pail": "^1.1",
@@ -63,6 +72,7 @@
         "preferred-install": "dist",
         "sort-packages": true,
         "allow-plugins": {
+            "civicrm/composer-compile-plugin": true,
             "pestphp/pest-plugin": true,
             "php-http/discovery": true
         }

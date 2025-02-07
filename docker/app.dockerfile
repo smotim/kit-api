@@ -9,13 +9,17 @@ RUN apt-get update && apt-get install -y \
     libxml2-dev \
     zip \
     unzip \
-    libssl-dev  # Добавляем SSL зависимости
+    libssl-dev \
+    pkg-config \
+    libssl-dev \
+    zlib1g-dev
 
 # Установка PHP расширений
 RUN docker-php-ext-install pdo mbstring exif pcntl bcmath gd
 
-# Установка расширения MongoDB для PHP с SSL
-RUN pecl install mongodb \
+# Install MongoDB extension with specific version
+RUN pecl install mongodb-1.18.0 \
+    && echo "extension=mongodb.so" > /usr/local/etc/php/conf.d/mongodb.ini \
     && docker-php-ext-enable mongodb
 
 # Установка Composer

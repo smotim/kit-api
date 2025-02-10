@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\City;
@@ -17,69 +17,67 @@ class DeliveryController extends Controller
     public function __construct(KitDeliveryService $kitService)
     {
         $this->kitService = $kitService;
-        $this->middleware('throttle:60,1')->only(['calculateDelivery']);
     }
 
-    public function calculateDelivery(Request $request): JsonResponse
+    public function calculateDelivery(Request $request)
     {
         $validated = $request->validate([
-            'from_city' => 'required|string',
-            'to_city' => 'required|string',
-            'weight' => 'required|numeric|min:0.1',
-            'length' => 'required|numeric|min:1',
-            'width' => 'required|numeric|min:1',
-            'height' => 'required|numeric|min:1',
+            'city_from' => 'required|string',
+            'city_to' => 'required|string',
+            'weight' => 'required|numeric',
+            'length' => 'required|numeric',
+            'width' => 'required|numeric',
+            'height' => 'required|numeric',
+            'declared_price' => 'required|numeric'
         ]);
 
         try {
             $result = $this->kitService->calculateDelivery($validated);
-            return response()->json($result);
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'price' => $result->standart->cost,
+                    'delivery_time' => $result->standart->time,
+                    'details' => $result->standart->detail
+                ]
+            ]);
         } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 400);
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 422);
+        }
+    }
+
+    public function getCityTerminals($cityId)
+    {
+        try {
+            $terminals = $this->kitService->getTerminals($cityId);
+            return response()->json([
+                'success' => true,
+                'data' => $terminals
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 422);
         }
     }
 
     public function searchCities(Request $request): JsonResponse
     {
-        $query = $request->input('query');
-        $cacheKey = 'cities_search_' . md5($query);
+        $query = $request->get('query');
 
-        $cities = Cache::tags(['cities'])->remember($cacheKey, now()->addHours(24), function () use ($query) {
-            return City::where('name', 'like', "%{$query}%")
-                ->orWhere('region', 'like', "%{$query}%")
-                ->take(20)
-                ->get();
-        });
+        if (empty($query)) {
+            return response()->json(null, 400);
+        }
 
-        return response()->json($cities);
-    }
-
-    public function getCityTerminals(string $cityId): JsonResponse
-    {
-        $cacheKey = 'city_terminals_' . $cityId;
-
-        $terminals = Cache::tags(['terminals'])->remember($cacheKey, now()->addHours(24), function () use ($cityId) {
-            return Terminal::where('city_id', $cityId)
-                ->with('city')
-                ->get();
-        });
-
-        return response()->json($terminals);
-    }
-
-    public function searchTerminals(Request $request): JsonResponse
-    {
-        $query = $request->input('query');
-        $cacheKey = 'terminals_search_' . md5($query);
-
-        $terminals = Cache::tags(['terminals'])->remember($cacheKey, now()->addHours(24), function () use ($query) {
-            return Terminal::where('name', 'like', "%{$query}%")
-                ->orWhere('address', 'like', "%{$query}%")
-                ->with('city')
-                ->take(20)
-                ->get();
-        });
-
-        return response()->json($terminals);
+        try {
+            $response = $this->kitService->searchCitiesByName($query);
+            return response()->json($response);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 }

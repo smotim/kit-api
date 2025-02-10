@@ -1,21 +1,8 @@
 services:
-  app:
-    build:
-      context: .
-      dockerfile: docker/app.dockerfile
-    container_name: laravel_app
-    volumes:
-      - .:/var/www/html
-    depends_on:
-      - mongodb
-    networks:
-      - app-network
-
   nginx:
     build:
       context: .
       dockerfile: docker/web.dockerfile
-    container_name: nginx
     ports:
       - "80:80"
     volumes:
@@ -24,20 +11,32 @@ services:
       - app
     networks:
       - app-network
+    container_name: kit_nginx
+
+  app:
+    build:
+      context: .
+      dockerfile: docker/app.dockerfile
+    volumes:
+      - .:/var/www/html
+    depends_on:
+      - mongodb
+    networks:
+      - app-network
+    container_name: kit_app
 
   mongodb:
     image: mongo:latest
-    container_name: mongodb
     ports:
       - "27017:27017"
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: 123456789
-      MONGO_INITDB_DATABASE: kit
+      MONGO_INITDB_ROOT_PASSWORD: secret
     volumes:
       - mongodb_data:/data/db
     networks:
       - app-network
+    container_name: kit_mongodb
 
 networks:
   app-network:

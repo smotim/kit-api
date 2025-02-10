@@ -1,119 +1,120 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
-use Smotim\KitAPI\Client;
-use Smotim\KitAPI\Service\CalculatorService;
-use Smotim\KitAPI\Service\GeographyService;
-use App\Models\City;
-use App\Models\Terminal;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Log;
+use service\KitAPI\Factory\SimpleClientFactory;
+use service\KitAPI\Interfaces\ApiExceptionInterface;
+use service\KitAPI\Interfaces\ClientExceptionInterface;
+use service\KitAPI\Model\Request\Order\CalculateRequest;
+use service\KitAPI\Model\Entity\Order\Place;
+use service\KitAPI\Model\Request\Geography\GetListAddressRequest;
 
 class KitDeliveryService
 {
-    private Client $client;
-    private CalculatorService $calculator;
-    private GeographyService $geography;
+    private \service\KitAPI\KitAPIClient $client;
 
     public function __construct()
     {
-        $this->client = new Client(
-            config('services.kit.token'),
-            config('services.kit.url')
-        );
-
-        $this->calculator = new CalculatorService($this->client);
-        $this->geography = new GeographyService($this->client);
+        $this->client = SimpleClientFactory::createClient('https://capi.tk-kit.com', 'ap_enNZSB0JPvpqp_UOuqbI8BVRAwYgT');
     }
 
-    public function calculateDelivery(array $params): array
+    /**
+     * Get list of cities
+     *
+     * @throws \Exception
+     */
+    public function getCities(): \service\KitAPI\Model\Response\Tdd\GetListCityResponse
     {
         try {
-            return $this->calculator->calculate($params);
-        } catch (\Exception $e) {
-            Log::error('KIT delivery calculation error', [
-                'params' => $params,
-                'error' => $e->getMessage()
-            ]);
-            throw $e;
+            return $this->client->tdd->getListCity();
+        } catch (ApiExceptionInterface|ClientExceptionInterface $e) {
+            throw new \Exception('Failed to get cities list: ' . $e->getMessage());
         }
     }
 
-    public function updateGeographyData(): void
+    /**
+     * Get terminals in city
+     *
+     * @param string $cityId
+     * @throws \Exception
+     */
+    public function getTerminals(string $cityId): array
     {
         try {
-            $startTime = microtime(true);
-            Log::info('Starting geography data update');
-
-            $cities = collect($this->geography->getCities());
-            $terminals = collect($this->geography->getTerminals());
-
-            // Bulk update cities
-            $citiesData = $cities->map(function ($cityData) {
-                return [
-                    'city_id' => $cityData['id'],
-                    'name' => $cityData['name'],
-                    'region' => $cityData['region'] ?? null,
-                    'terminals_count' => $cityData['terminals_count'] ?? 0,
-                    'updated_at' => now()
-                ];
-            })->toArray();
-
-            City::raw()->bulkWrite(
-                array_map(function ($city) {
-                    return [
-                        'updateOne' => [
-                            ['city_id' => $city['city_id']],
-                            ['$set' => $city],
-                            ['upsert' => true]
-                        ]
-                    ];
-                }, $citiesData)
+            $response = $this->client->geography->getListAddress(
+                new GetListAddressRequest($cityId, true, true)
             );
 
-            // Bulk update terminals
-            $terminalsData = $terminals->map(function ($terminalData) {
-                return [
-                    'terminal_id' => $terminalData['id'],
-                    'city_id' => $terminalData['city_id'],
-                    'name' => $terminalData['name'],
-                    'address' => $terminalData['address'],
-                    'phone' => $terminalData['phone'] ?? null,
-                    'working_hours' => $terminalData['working_hours'] ?? null,
-                    'coordinates' => [
-                        'lat' => $terminalData['latitude'] ?? null,
-                        'lng' => $terminalData['longitude'] ?? null,
-                    ],
-                    'updated_at' => now()
-                ];
-            })->toArray();
+            return $response->addreses;
+        } catch (ApiExceptionInterface|ClientExceptionInterface $e) {
+            throw new \Exception('Failed to get terminals: ' . $e->getMessage());
+        }
+    }
 
-            Terminal::raw()->bulkWrite(
-                array_map(function ($terminal) {
-                    return [
-                        'updateOne' => [
-                            ['terminal_id' => $terminal['terminal_id']],
-                            ['$set' => $terminal],
-                            ['upsert' => true]
-                        ]
-                    ];
-                }, $terminalsData)
+    /**
+     * Calculate delivery cost
+     *
+     * @param array $data
+     * @throws \Exception
+     */
+    public function calculateDelivery(array $data): \service\KitAPI\Model\Entity\Order\CalculateResult
+    {
+        try {
+            $request = new CalculateRequest();
+            $request->city_pickup_code = $data['city_from'];
+            $request->city_delivery_code = $data['city_to'];
+            $request->declared_price = $data['declared_price'];
+
+            $place = new Place();
+            $place->height = $data['height'];
+            $place->width = $data['width'];
+            $place->length = $data['length'];
+            $place->weight = $data['weight'];
+            $place->volume = round(
+                ($data['height'] * $data['width'] * $data['length']) / 1000000,
+                3
             );
+            $place->count_place = 1;
 
-            $duration = round(microtime(true) - $startTime, 2);
-            Log::info("Geography data update completed", [
-                'duration' => $duration,
-                'cities_count' => count($citiesData),
-                'terminals_count' => count($terminalsData)
-            ]);
+            $request->places = [$place];
+            $request->delivery = 1;
+            $request->currency_code = ['RUB'];
 
-        } catch (\Exception $e) {
-            Log::error('KIT geography update error', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-            throw $e;
+            $response = $this->client->order->calculate($request);
+            return $response->getResult();
+        } catch (ApiExceptionInterface|ClientExceptionInterface $e) {
+            throw new \Exception('Failed to calculate delivery: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Get list of countries
+     *
+     * @throws \Exception
+     */
+    public function getCountries(): \service\KitAPI\Model\Response\Tdd\GetListCountryResponse
+    {
+        try {
+            return $this->client->tdd->getListCountry();
+        } catch (ApiExceptionInterface|ClientExceptionInterface $e) {
+            throw new \Exception('Failed to get countries list: ' . $e->getMessage());
+        }
+    }
+    /**
+     * Search cities by name
+     *
+     * @param string $title
+     * @throws \Exception
+     */
+    public function searchCitiesByName(string $title): \service\KitAPI\Model\Response\Tdd\SearchByNameResponse
+    {
+        try {
+            $request = new \service\KitAPI\Model\Request\Tdd\SearchByNameRequest($title);
+            return $this->client->tdd->searchByName($request);
+        } catch (ApiExceptionInterface|ClientExceptionInterface $e) {
+            throw new \Exception('Failed to search cities: ' . $e->getMessage());
         }
     }
 }

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "eeb505a829b337c9f30cf56de818b542",
+    "content-hash": "16856510131dc67493caff99a93c11ac",
     "packages": [
         {
             "name": "brick/math",
@@ -1430,12 +1430,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/smotim/sdk-kit-api.git",
-                "reference": "a1ede449674aac9c2cb4ed5a0687ee7f72de81b8"
+                "reference": "7e1ef2bacfd95f765709bab2e2d08af17f32a48f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/smotim/sdk-kit-api/zipball/a1ede449674aac9c2cb4ed5a0687ee7f72de81b8",
-                "reference": "a1ede449674aac9c2cb4ed5a0687ee7f72de81b8",
+                "url": "https://api.github.com/repos/smotim/sdk-kit-api/zipball/7e1ef2bacfd95f765709bab2e2d08af17f32a48f",
+                "reference": "7e1ef2bacfd95f765709bab2e2d08af17f32a48f",
                 "shasum": ""
             },
             "require": {
@@ -1545,7 +1545,7 @@
             "support": {
                 "source": "https://github.com/smotim/sdk-kit-api/tree/main"
             },
-            "time": "2025-02-07T05:34:44+00:00"
+            "time": "2025-02-10T10:41:21+00:00"
         },
         {
             "name": "laravel/framework",

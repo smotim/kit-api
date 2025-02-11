@@ -18,7 +18,21 @@ class DeliveryController extends Controller
     {
         $this->kitService = $kitService;
     }
-
+    public function getAllTerminals(): JsonResponse
+    {
+        try {
+            $terminals = $this->kitService->getTerminals();
+            return response()->json([
+                'success' => true,
+                'data' => $terminals
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 422);
+        }
+    }
     public function calculateDelivery(Request $request): JsonResponse
     {
         $validated = $request->validate([

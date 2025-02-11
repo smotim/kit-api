@@ -40,14 +40,20 @@ class KitDeliveryService
      * @param string $cityId
      * @throws \Exception
      */
-    public function getTerminals(string $cityId): array
+    public function getTerminals(string $cityId = null): array
     {
         try {
-            $response = $this->client->geography->getListAddress(
-                new GetListAddressRequest($cityId, true, true)
-            );
-
-            return $response->addreses;
+            if ($cityId) {
+                $response = $this->client->geography->getListAddress(
+                    new GetListAddressRequest($cityId, true, true)
+                );
+                return $response->addreses;
+            } else {
+                $response = $this->client->geography->getListAddress(
+                    new GetListAddressRequest()
+                );
+                return $response->addreses;
+            }
         } catch (ApiExceptionInterface|ClientExceptionInterface $e) {
             throw new \Exception('Failed to get terminals: ' . $e->getMessage());
         }

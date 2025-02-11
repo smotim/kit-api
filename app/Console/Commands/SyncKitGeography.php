@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Services\KitDeliveryService;
 use Illuminate\Console\Command;
+use App\Models\Terminal;
 
 class SyncKitGeography extends Command
 {
@@ -33,27 +34,36 @@ class SyncKitGeography extends Command
 
             $start = microtime(true);
 
-            // Выполняем синхронизацию
-            $this->kitService->updateGeographyData();
+            // Fetch terminals
+            $terminals = $this->kitService->getTerminals();
+
+            // Save terminals to MongoDB
+            foreach ($terminals as $cityName => $cityTerminals) {
+                foreach ($cityTerminals as $terminal) {
+                    if (is_object($terminal)) {
+                        Terminal::updateOrCreate(
+                            ['id' => $terminal->id],
+                            [
+                                'geography_city_id' => $terminal->geography_city_id,
+                                'lat' => $terminal->lat,
+                                'lon' => $terminal->lon,
+                                'address_code' => $terminal->address_code,
+                                'cityName' => $cityName,
+                                'phones' => $terminal->phones,
+                                'emails' => $terminal->emails,
+                                'value' => $terminal->value,
+                            ]
+                        );
+                    }
+                }
+            }
 
             $duration = round(microtime(true) - $start, 2);
 
-            // Сохраняем время последней синхронизации
+            // Save the last sync time
             cache()->put('last_kit_sync', $now, now()->addDays(30));
 
             $this->info("Synchronization completed in {$duration} seconds");
-
-            // Выводим статистику
-            $citiesCount = \App\Models\City::count();
-            $terminalsCount = \App\Models\Terminal::count();
-
-            $this->table(
-                ['Entity', 'Count'],
-                [
-                    ['Cities', $citiesCount],
-                    ['Terminals', $terminalsCount],
-                ]
-            );
 
             return 0;
 

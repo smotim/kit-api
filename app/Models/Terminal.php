@@ -10,14 +10,15 @@ class Terminal extends Model
     protected $collection = 'terminals';
 
     protected $fillable = [
-        'terminal_id',
-        'city_id',
-        'name',
-        'address',
-        'phone',
-        'working_hours',
-        'coordinates',
-        'updated_at'
+        'id',
+        'geography_city_id',
+        'lat',
+        'lon',
+        'address_code',
+        'cityName',
+        'phones',
+        'emails',
+        'value',
     ];
 
     public function city()

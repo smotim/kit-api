@@ -8,4 +8,5 @@ Route::prefix('v1')->group(function () {
     Route::get('/cities/search', [DeliveryController::class, 'searchCities']);
     Route::get('/cities/{cityId}/terminals', [DeliveryController::class, 'getCityTerminals']);
     Route::get('/terminals/search', [DeliveryController::class, 'searchTerminals']);
+    Route::get('/terminals', [DeliveryController::class, 'getAllTerminals']);
 });

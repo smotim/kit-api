@@ -19,7 +19,7 @@ class DeliveryController extends Controller
         $this->kitService = $kitService;
     }
 
-    public function calculateDelivery(Request $request)
+    public function calculateDelivery(Request $request): JsonResponse
     {
         $validated = $request->validate([
             'city_from' => 'required|string',
@@ -49,7 +49,7 @@ class DeliveryController extends Controller
         }
     }
 
-    public function getCityTerminals($cityId)
+    public function getCityTerminals($cityId): JsonResponse
     {
         try {
             $terminals = $this->kitService->getTerminals($cityId);

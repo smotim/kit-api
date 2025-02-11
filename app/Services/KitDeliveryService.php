@@ -17,7 +17,7 @@ class KitDeliveryService
 
     public function __construct()
     {
-        $this->client = SimpleClientFactory::createClient('https://capi.tk-kit.com', 'ap_enNZSB0JPvpqp_UOuqbI8BVRAwYgT');
+        $this->client = SimpleClientFactory::createClient('https://capi.tk-kit.com',config('services.kit.token') );
     }
 
     /**

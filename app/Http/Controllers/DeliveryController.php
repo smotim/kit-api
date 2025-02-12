@@ -22,10 +22,7 @@ class DeliveryController extends Controller
     {
         try {
             $terminals = $this->kitService->getTerminals();
-            return response()->json([
-                'success' => true,
-                'data' => $terminals
-            ]);
+            return response()->json(['data' => $terminals]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -67,10 +64,7 @@ class DeliveryController extends Controller
     {
         try {
             $terminals = $this->kitService->getTerminals($cityId);
-            return response()->json([
-                'success' => true,
-                'data' => $terminals
-            ]);
+            return response()->json(['data' => $terminals]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,

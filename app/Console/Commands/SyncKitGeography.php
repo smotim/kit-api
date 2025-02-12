@@ -36,10 +36,7 @@ class SyncKitGeography extends Command
 
             // Fetch terminals
             $terminals = $this->kitService->getTerminals();
-
-            // Save terminals to MongoDB
-            foreach ($terminals as $cityName => $cityTerminals) {
-                foreach ($cityTerminals as $terminal) {
+                foreach ($terminals as $terminal) {
                     if (is_object($terminal)) {
                         Terminal::updateOrCreate(
                             ['id' => $terminal->id],
@@ -48,15 +45,14 @@ class SyncKitGeography extends Command
                                 'lat' => $terminal->lat,
                                 'lon' => $terminal->lon,
                                 'address_code' => $terminal->address_code,
-                                'cityName' => $cityName,
-                                'phones' => $terminal->phones,
-                                'emails' => $terminal->emails,
+                                'city_name' => $terminal->city_name,
+                                'phone' => $terminal->phone,
+                                'email' => $terminal->email,
                                 'value' => $terminal->value,
                             ]
                         );
                     }
                 }
-            }
 
             $duration = round(microtime(true) - $start, 2);
 

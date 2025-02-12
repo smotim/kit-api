@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use MongoDB\Laravel\Eloquent\Model;
 
 class Terminal extends Model
 {
-    protected $connection = 'mongodb';
-    protected $collection = 'terminals';
+    use  HasFactory;
+    protected  $connection = 'mongodb';
+    protected  $collection = 'terminals';
 
     protected $fillable = [
         'id',
@@ -15,14 +17,14 @@ class Terminal extends Model
         'lat',
         'lon',
         'address_code',
-        'cityName',
-        'phones',
-        'emails',
+        'city_name',
+        'phone',
+        'email',
         'value',
     ];
 
-    public function city()
-    {
-        return $this->belongsTo(City::class, 'city_id', 'city_id');
-    }
+//    public function city()
+//    {
+//        return $this->belongsTo(City::class, 'city_id', 'city_id');
+//    }
 }

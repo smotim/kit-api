@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use Exception;
 use service\KitAPI\Factory\SimpleClientFactory;
 use service\KitAPI\Interfaces\ApiExceptionInterface;
 use service\KitAPI\Interfaces\ClientExceptionInterface;
+use service\KitAPI\Model\Entity\Order\CalculateResult;
 use service\KitAPI\Model\Request\Order\CalculateRequest;
 use service\KitAPI\Model\Entity\Order\Place;
 use service\KitAPI\Model\Request\Geography\GetListAddressRequest;
@@ -23,39 +25,35 @@ class KitDeliveryService
     /**
      * Get list of cities
      *
-     * @throws \Exception
+     * @throws Exception|\Psr\Http\Client\ClientExceptionInterface
      */
     public function getCities(): \service\KitAPI\Model\Response\Tdd\GetListCityResponse
     {
         try {
             return $this->client->tdd->getListCity();
         } catch (ApiExceptionInterface|ClientExceptionInterface $e) {
-            throw new \Exception('Failed to get cities list: ' . $e->getMessage());
+            throw new Exception('Failed to get cities list: ' . $e->getMessage());
         }
     }
 
     /**
      * Get terminals in city
      *
-     * @param string $cityId
-     * @throws \Exception
+     * @param string|null $cityId
+     * @return array
+     * @throws \Psr\Http\Client\ClientExceptionInterface
+     * @throws Exception
      */
     public function getTerminals(string $cityId = null): array
     {
         try {
-            if ($cityId) {
-                $response = $this->client->geography->getListAddress(
-                    new GetListAddressRequest($cityId, true, true)
-                );
-                return $response->addreses;
-            } else {
-                $response = $this->client->geography->getListAddress(
-                    new GetListAddressRequest()
-                );
-                return $response->addreses;
-            }
+            $request = $cityId
+                ? new GetListAddressRequest($cityId, true, true)
+                : new GetListAddressRequest(withPhone: true, withEmail: true);
+            $response = $this->client->geography->getListAddress($request);
+            return $response->addreses;
         } catch (ApiExceptionInterface|ClientExceptionInterface $e) {
-            throw new \Exception('Failed to get terminals: ' . $e->getMessage());
+            throw new Exception('Failed to get terminals: ' . $e->getMessage());
         }
     }
 
@@ -63,7 +61,8 @@ class KitDeliveryService
      * Calculate delivery cost
      *
      * @param array $data
-     * @throws \Exception
+     * @return CalculateResult
+     * @throws \Psr\Http\Client\ClientExceptionInterface
      */
     public function calculateDelivery(array $data): \service\KitAPI\Model\Entity\Order\CalculateResult
     {
@@ -91,28 +90,28 @@ class KitDeliveryService
             $response = $this->client->order->calculate($request);
             return $response->getResult();
         } catch (ApiExceptionInterface|ClientExceptionInterface $e) {
-            throw new \Exception('Failed to calculate delivery: ' . $e->getMessage());
+            throw new Exception('Failed to calculate delivery: ' . $e->getMessage());
         }
     }
 
     /**
      * Get list of countries
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function getCountries(): \service\KitAPI\Model\Response\Tdd\GetListCountryResponse
     {
         try {
             return $this->client->tdd->getListCountry();
         } catch (ApiExceptionInterface|ClientExceptionInterface $e) {
-            throw new \Exception('Failed to get countries list: ' . $e->getMessage());
+            throw new Exception('Failed to get countries list: ' . $e->getMessage());
         }
     }
     /**
      * Search cities by name
      *
      * @param string $title
-     * @throws \Exception
+     * @throws Exception
      */
     public function searchCitiesByName(string $title): \service\KitAPI\Model\Response\Tdd\SearchByNameResponse
     {
@@ -120,7 +119,7 @@ class KitDeliveryService
             $request = new \service\KitAPI\Model\Request\Tdd\SearchByNameRequest($title);
             return $this->client->tdd->searchByName($request);
         } catch (ApiExceptionInterface|ClientExceptionInterface $e) {
-            throw new \Exception('Failed to search cities: ' . $e->getMessage());
+            throw new Exception('Failed to search cities: ' . $e->getMessage());
         }
     }
 }

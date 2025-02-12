@@ -17,7 +17,7 @@ class CreateTerminalsCollection extends Command
             $collection->createIndex(['geography_city_id' => 1]);
             $collection->createIndex(['lat' => 1, 'lon' => 1]);
             $collection->createIndex(['address_code' => 1]);
-            $collection->createIndex(['cityName' => 1]);
+            $collection->createIndex(['city_name' => 1]);
             $collection->createIndex(['phones' => 1]);
             $collection->createIndex(['emails' => 1]);
         });

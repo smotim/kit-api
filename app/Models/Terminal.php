@@ -7,9 +7,10 @@ use MongoDB\Laravel\Eloquent\Model;
 
 class Terminal extends Model
 {
-    use  HasFactory;
-    protected  $connection = 'mongodb';
-    protected  $collection = 'terminals';
+    use HasFactory;
+
+    protected $connection = 'mongodb';
+    protected $collection = 'terminals';
 
     protected $fillable = [
         'id',

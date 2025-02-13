@@ -17,3 +17,6 @@ install:
 .PHONY: bash
 bash:
 	docker exec -it kit_app bash
+.PHONY: kit-sync
+kit-sync:
+	docker exec iceberg_php php artisan kit:sync-geography

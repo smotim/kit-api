@@ -10,7 +10,7 @@ class Kernel extends ConsoleKernel
 {
     protected function schedule(Schedule $schedule)
     {
-        $schedule->job(new UpdateKitGeographyData)
+        $schedule->job(new UpdateKitGeographyData())
             ->monthly()
             ->at('00:00')
             ->withoutOverlapping();

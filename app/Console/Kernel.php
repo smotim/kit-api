@@ -11,7 +11,7 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         $schedule->job(new UpdateKitGeographyData())
-            ->monthly()
+            ->weekly()
             ->at('00:00')
             ->withoutOverlapping();
     }

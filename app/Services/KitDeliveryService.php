@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\DTO\DeliveryCalculationDTO;
 use Exception;
 use service\KitAPI\Factory\SimpleClientFactory;
 use service\KitAPI\Interfaces\ApiExceptionInterface;
@@ -12,6 +13,7 @@ use service\KitAPI\Model\Entity\Order\CalculateResult;
 use service\KitAPI\Model\Request\Order\CalculateRequest;
 use service\KitAPI\Model\Entity\Order\Place;
 use service\KitAPI\Model\Request\Geography\GetListAddressRequest;
+use service\KitAPI\Model\Response\Tdd\SearchByNameResponse;
 
 class KitDeliveryService
 {
@@ -20,20 +22,6 @@ class KitDeliveryService
     public function __construct()
     {
         $this->client = SimpleClientFactory::createClient('https://capi.tk-kit.com', config('services.kit.token'));
-    }
-
-    /**
-     * Get list of cities
-     *
-     * @throws Exception|\Psr\Http\Client\ClientExceptionInterface
-     */
-    public function getCities(): \service\KitAPI\Model\Response\Tdd\GetListCityResponse
-    {
-        try {
-            return $this->client->tdd->getListCity();
-        } catch (ApiExceptionInterface | ClientExceptionInterface $e) {
-            throw new Exception('Failed to get cities list: ' . $e->getMessage());
-        }
     }
 
     /**
@@ -64,29 +52,11 @@ class KitDeliveryService
      * @return CalculateResult
      * @throws \Psr\Http\Client\ClientExceptionInterface
      */
-    public function calculateDelivery(array $data): \service\KitAPI\Model\Entity\Order\CalculateResult
+    public function calculateDelivery(array $data): CalculateResult
     {
         try {
-            $request = new CalculateRequest();
-            $request->city_pickup_code = $data['city_from'];
-            $request->city_delivery_code = $data['city_to'];
-            $request->declared_price = $data['declared_price'];
-
-            $place = new Place();
-            $place->height = $data['height'];
-            $place->width = $data['width'];
-            $place->length = $data['length'];
-            $place->weight = $data['weight'];
-            $place->volume = round(
-                ($data['height'] * $data['width'] * $data['length']) / 1000000,
-                3
-            );
-            $place->count_place = 1;
-
-            $request->places = [$place];
-            $request->delivery = 1;
-            $request->currency_code = ['RUB'];
-
+            $dto = DeliveryCalculationDTO::fromArray($data);
+            $request = $dto->toCalculateRequest();
             $response = $this->client->order->calculate($request);
             return $response->getResult();
         } catch (ApiExceptionInterface | ClientExceptionInterface $e) {
@@ -97,21 +67,23 @@ class KitDeliveryService
     /**
      * Get list of countries
      *
-     * @throws Exception
+     * @throws Exception|\Psr\Http\Client\ClientExceptionInterface
      */
-    public function getCountries(): \service\KitAPI\Model\Response\Tdd\GetListCountryResponse
+    public function getServicesList(): \service\KitAPI\Model\Response\Order\GetListServiceResponse
     {
         try {
-            return $this->client->tdd->getListCountry();
+            return $this->client->order->getListService();
         } catch (ApiExceptionInterface | ClientExceptionInterface $e) {
-            throw new Exception('Failed to get countries list: ' . $e->getMessage());
+            throw new Exception('Failed to get services list: ' . $e->getMessage());
         }
     }
+
     /**
      * Search cities by name
      *
      * @param string $title
-     * @throws Exception
+     * @return SearchByNameResponse
+     * @throws \Psr\Http\Client\ClientExceptionInterface
      */
     public function searchCitiesByName(string $title): \service\KitAPI\Model\Response\Tdd\SearchByNameResponse
     {

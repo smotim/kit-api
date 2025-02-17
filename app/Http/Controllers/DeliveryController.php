@@ -18,6 +18,7 @@ class DeliveryController extends Controller
     {
         $this->kitService = $kitService;
     }
+
     public function getAllTerminals(): JsonResponse
     {
         try {
@@ -25,37 +26,7 @@ class DeliveryController extends Controller
             return response()->json(['data' => $terminals]);
         } catch (\Exception $e) {
             return response()->json([
-                'success' => false,
-                'message' => $e->getMessage()
-            ], 422);
-        }
-    }
-    public function calculateDelivery(Request $request): JsonResponse
-    {
-        $validated = $request->validate([
-            'city_from' => 'required|string',
-            'city_to' => 'required|string',
-            'weight' => 'required|numeric',
-            'length' => 'required|numeric',
-            'width' => 'required|numeric',
-            'height' => 'required|numeric',
-            'declared_price' => 'required|numeric'
-        ]);
-
-        try {
-            $result = $this->kitService->calculateDelivery($validated);
-            return response()->json([
-                'success' => true,
-                'data' => [
-                    'price' => $result->standart->cost,
-                    'delivery_time' => $result->standart->time,
-                    'details' => $result->standart->detail
-                ]
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage()
+                'success' => false, 'message' => $e->getMessage()
             ], 422);
         }
     }
@@ -67,11 +38,31 @@ class DeliveryController extends Controller
             return response()->json(['data' => $terminals]);
         } catch (\Exception $e) {
             return response()->json([
-                'success' => false,
-                'message' => $e->getMessage()
+                'success' => false, 'message' => $e->getMessage()
             ], 422);
         }
     }
+
+    public function calculateDelivery(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'city_from' => 'required|string', 'city_to' => 'required|string', 'weight' => 'required|numeric', 'length' => 'required|numeric', 'width' => 'required|numeric', 'height' => 'required|numeric', 'declared_price' => 'required|numeric'
+        ]);
+
+        try {
+            $result = $this->kitService->calculateDelivery($validated);
+            return response()->json([
+                'success' => true, 'data' => [
+                    'price' => $result->standart->cost, 'delivery_time' => $result->standart->time, 'details' => $result->standart->detail
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false, 'message' => $e->getMessage()
+            ], 422);
+        }
+    }
+
 
     public function searchCities(Request $request): JsonResponse
     {

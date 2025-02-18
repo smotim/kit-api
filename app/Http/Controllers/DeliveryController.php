@@ -1,23 +1,30 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
-use App\Models\Terminal;
 use App\Services\KitDeliveryService;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Cache;
+use Illuminate\Http\Request;
+use Psr\Http\Client\ClientExceptionInterface;
 
-class DeliveryController extends Controller
+class DeliveryController
 {
     private KitDeliveryService $kitService;
 
+    /**
+     * @param KitDeliveryService $kitService
+     */
     public function __construct(KitDeliveryService $kitService)
     {
         $this->kitService = $kitService;
     }
 
+    /**
+     * @return JsonResponse
+     * @throws ClientExceptionInterface
+     */
     public function getAllTerminals(): JsonResponse
     {
         try {
@@ -30,6 +37,11 @@ class DeliveryController extends Controller
         }
     }
 
+    /**
+     * @param $cityId
+     * @return JsonResponse
+     * @throws ClientExceptionInterface
+     */
     public function getCityTerminals($cityId): JsonResponse
     {
         try {
@@ -42,10 +54,14 @@ class DeliveryController extends Controller
         }
     }
 
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     * @throws ClientExceptionInterface
+     */
     public function calculateDelivery(Request $request): JsonResponse
     {
         try {
-            // Convert request to array and get all input data
             $data = $request->all();
             $result = $this->kitService->calculateDelivery($data);
             return response()->json([
@@ -65,6 +81,11 @@ class DeliveryController extends Controller
     }
 
 
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     * @throws ClientExceptionInterface
+     */
     public function searchCities(Request $request): JsonResponse
     {
         $query = $request->get('query');

@@ -1,11 +1,7 @@
 <?php
 
 use App\Http\Controllers\DeliveryController;
-
 use App\Http\Controllers\TerminalController;
-use App\Models\Terminal;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {

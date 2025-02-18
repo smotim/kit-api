@@ -56,11 +56,21 @@ class DeliveryCalculationDTO
         $dto->declaredPrice = $data['declared_price'];
         $dto->places = $data['places'];
 
-        if (isset($data['pick_up'])) $dto->pickUp = $data['pick_up'];
-        if (isset($data['delivery'])) $dto->delivery = $data['delivery'];
-        if (isset($data['cargo_type_code'])) $dto->cargoTypeCode = $data['cargo_type_code'];
-        if (isset($data['currency_code'])) $dto->currencyCode = $data['currency_code'];
-        if (isset($data['all_places_same'])) $dto->allPlacesSame = $data['all_places_same'];
+        if (isset($data['pick_up'])) {
+            $dto->pickUp = $data['pick_up'];
+        }
+        if (isset($data['delivery'])) {
+            $dto->delivery = $data['delivery'];
+        }
+        if (isset($data['cargo_type_code'])) {
+            $dto->cargoTypeCode = $data['cargo_type_code'];
+        }
+        if (isset($data['currency_code'])) {
+            $dto->currencyCode = $data['currency_code'];
+        }
+        if (isset($data['all_places_same'])) {
+            $dto->allPlacesSame = $data['all_places_same'];
+        }
 
         return $dto;
     }

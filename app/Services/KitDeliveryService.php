@@ -10,8 +10,6 @@ use service\KitAPI\Factory\SimpleClientFactory;
 use service\KitAPI\Interfaces\ApiExceptionInterface;
 use service\KitAPI\Interfaces\ClientExceptionInterface;
 use service\KitAPI\Model\Entity\Order\CalculateResult;
-use service\KitAPI\Model\Request\Order\CalculateRequest;
-use service\KitAPI\Model\Entity\Order\Place;
 use service\KitAPI\Model\Request\Geography\GetListAddressRequest;
 use service\KitAPI\Model\Response\Tdd\SearchByNameResponse;
 

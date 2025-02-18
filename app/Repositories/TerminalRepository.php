@@ -16,18 +16,19 @@ class TerminalRepository
         $this->collection = Terminal::raw();
     }
 
-    public function search(string $query, ?string $cityId = null): array
+    /**
+     * @param string|null $query
+     * @return array
+     */
+    public function search(?string $query = null): array
     {
-        $filter = [
-            '$or' => [
-                ['value' => ['$regex' => $query, '$options' => 'i']],
+        $filter = [];
+
+        if ($query) {
+            $filter['$or'] = [
                 ['city_name' => ['$regex' => $query, '$options' => 'i']],
                 ['address_code' => ['$regex' => $query, '$options' => 'i']]
-            ]
-        ];
-
-        if ($cityId) {
-            $filter['geography_city_id'] = $cityId;
+            ];
         }
 
         return $this->collection

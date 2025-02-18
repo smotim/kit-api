@@ -10,7 +10,8 @@ services:
     depends_on:
       - app
     networks:
-      - app-network
+      - kit-network
+      - shared-network
     container_name: kit_nginx
 
   app:
@@ -22,7 +23,8 @@ services:
     depends_on:
       - mongodb
     networks:
-      - app-network
+      - kit-network
+      - shared-network
     container_name: kit_app
 
   mongodb:
@@ -35,11 +37,16 @@ services:
     volumes:
       - mongodb_data:/data/db
     networks:
-      - app-network
+      - kit-network
+      - shared-network
     container_name: kit_mongodb
 
 networks:
-  app-network:
+  shared-network:
+    name: "${BACKEND_NETWORK_NAME}"
+    external: true
+  kit-network:
+    name: "kit-network"
     driver: bridge
 
 volumes:

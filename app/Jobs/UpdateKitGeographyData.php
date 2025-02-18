@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Jobs;
 
 use App\Models\Terminal;
@@ -13,7 +15,10 @@ use Illuminate\Support\Facades\Log;
 
 class UpdateKitGeographyData implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
 
     public function handle(KitDeliveryService $kitService)
     {
@@ -49,7 +54,6 @@ class UpdateKitGeographyData implements ShouldQueue
             $duration = round(microtime(true) - $start, 2);
 
             Log::info("Synchronization completed in {$duration} seconds");
-
         } catch (\Exception $e) {
             Log::error("Synchronization failed: {$e->getMessage()}");
             Log::error($e->getTraceAsString());

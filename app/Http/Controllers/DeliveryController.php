@@ -24,7 +24,7 @@ readonly class DeliveryController
     {
         try {
             $terminals = $this->kitService->getTerminals();
-            return response()->json(['data' => $terminals], Response::HTTP_OK);
+            return response()->json($terminals, Response::HTTP_OK);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => $e->getMessage()
@@ -41,7 +41,7 @@ readonly class DeliveryController
     {
         try {
             $terminals = $this->kitService->getTerminals($cityId);
-            return response()->json(['data' => $terminals], Response::HTTP_OK);
+            return response()->json($terminals, Response::HTTP_OK);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => $e->getMessage()
@@ -87,7 +87,7 @@ readonly class DeliveryController
 
         try {
             $cities = $this->kitService->searchCitiesByName($request->get('query'));
-            return response()->json(['data' => $cities], Response::HTTP_OK);
+            return response()->json($cities, Response::HTTP_OK);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => $e->getMessage()

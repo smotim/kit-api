@@ -8,18 +8,13 @@ use App\Services\KitDeliveryService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Psr\Http\Client\ClientExceptionInterface;
+use Symfony\Component\HttpFoundation\Response;
 
-class DeliveryController
+readonly class DeliveryController
 {
-    private KitDeliveryService $kitService;
-
-    /**
-     * @param KitDeliveryService $kitService
-     */
-    public function __construct(KitDeliveryService $kitService)
-    {
-        $this->kitService = $kitService;
-    }
+    public function __construct(
+        private KitDeliveryService $kitService
+    ) {}
 
     /**
      * @return JsonResponse
@@ -29,28 +24,28 @@ class DeliveryController
     {
         try {
             $terminals = $this->kitService->getTerminals();
-            return response()->json(['data' => $terminals]);
+            return response()->json(['data' => $terminals], Response::HTTP_OK);
         } catch (\Exception $e) {
             return response()->json([
-                'success' => false, 'message' => $e->getMessage()
-            ], 422);
+                'message' => $e->getMessage()
+            ], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
     }
 
     /**
-     * @param $cityId
+     * @param string $cityId
      * @return JsonResponse
      * @throws ClientExceptionInterface
      */
-    public function getCityTerminals($cityId): JsonResponse
+    public function getCityTerminals(string $cityId): JsonResponse
     {
         try {
             $terminals = $this->kitService->getTerminals($cityId);
-            return response()->json(['data' => $terminals]);
+            return response()->json(['data' => $terminals], Response::HTTP_OK);
         } catch (\Exception $e) {
             return response()->json([
-                'success' => false, 'message' => $e->getMessage()
-            ], 422);
+                'message' => $e->getMessage()
+            ], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
     }
 
@@ -62,24 +57,20 @@ class DeliveryController
     public function calculateDelivery(Request $request): JsonResponse
     {
         try {
-            $data = $request->all();
-            $result = $this->kitService->calculateDelivery($data);
+            $result = $this->kitService->calculateDelivery($request->all());
             return response()->json([
-                'success' => true,
                 'data' => [
                     'price' => $result->standart->cost,
                     'delivery_time' => $result->standart->time,
                     'details' => $result->standart->detail
                 ]
-            ]);
+            ], Response::HTTP_OK);
         } catch (\Exception $e) {
             return response()->json([
-                'success' => false,
                 'message' => $e->getMessage()
-            ], 422);
+            ], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
     }
-
 
     /**
      * @param Request $request
@@ -88,17 +79,19 @@ class DeliveryController
      */
     public function searchCities(Request $request): JsonResponse
     {
-        $query = $request->get('query');
-
-        if (empty($query)) {
-            return response()->json(null, 400);
+        if (!$request->has('query')) {
+            return response()->json([
+                'message' => 'Search query is required'
+            ], Response::HTTP_BAD_REQUEST);
         }
 
         try {
-            $response = $this->kitService->searchCitiesByName($query);
-            return response()->json($response);
+            $cities = $this->kitService->searchCitiesByName($request->get('query'));
+            return response()->json(['data' => $cities], Response::HTTP_OK);
         } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+            return response()->json([
+                'message' => $e->getMessage()
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 }

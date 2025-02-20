@@ -6,12 +6,14 @@ namespace App\Services;
 
 use App\DTO\DeliveryCalculationDTO;
 use Exception;
+use InvalidArgumentException;
 use service\KitAPI\Factory\SimpleClientFactory;
 use service\KitAPI\Interfaces\ApiExceptionInterface;
 use service\KitAPI\Interfaces\ClientExceptionInterface;
 use service\KitAPI\Model\Entity\Order\CalculateResult;
 use service\KitAPI\Model\Request\Geography\GetListAddressRequest;
 use service\KitAPI\Model\Response\Tdd\SearchByNameResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 class KitDeliveryService
 {
@@ -57,8 +59,10 @@ class KitDeliveryService
             $request = $dto->toCalculateRequest();
             $response = $this->client->order->calculate($request);
             return $response->getResult();
+        } catch (InvalidArgumentException $e) {
+            throw new \Exception($e->getMessage(), Response::HTTP_UNPROCESSABLE_ENTITY);
         } catch (ApiExceptionInterface | ClientExceptionInterface $e) {
-            throw new Exception('Failed to calculate delivery: ' . $e->getMessage());
+            throw new \Exception('Failed to calculate delivery: ' . $e->getMessage(), Response::HTTP_BAD_GATEWAY);
         }
     }
 

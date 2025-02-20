@@ -59,11 +59,7 @@ readonly class DeliveryController
         try {
             $result = $this->kitService->calculateDelivery($request->all());
             return response()->json([
-                'data' => [
-                    'price' => $result->standart->cost,
-                    'delivery_time' => $result->standart->time,
-                    'details' => $result->standart->detail
-                ]
+                'data' => $result
             ], Response::HTTP_OK);
         } catch (\Exception $e) {
             return response()->json([

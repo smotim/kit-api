@@ -33,11 +33,11 @@ class DeliveryCalculationDTO
     /** @var string|null */
     private ?string $insuranceAgentCode = null;
 
-    /** @var int */
-    private int $pickUp = 0;
+    /** @var bool */
+    private bool $pickUp = false;
 
-    /** @var int */
-    private int $delivery = 1;
+    /** @var bool */
+    private bool $delivery = false;
 
     /** @var string */
     private string $cargoTypeCode = '03';
@@ -51,8 +51,8 @@ class DeliveryCalculationDTO
     public static function fromArray(array $data): self
     {
         $dto = new self();
-        $dto->cityFrom = $data['city_from'];
-        $dto->cityTo = $data['city_to'];
+        $dto->cityFrom = $data['city_delivery_code'];
+        $dto->cityTo = $data['city_pickup_code'];
         $dto->declaredPrice = $data['declared_price'];
         $dto->places = $data['places'];
 

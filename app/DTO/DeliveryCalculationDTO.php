@@ -33,11 +33,11 @@ class DeliveryCalculationDTO
     /** @var string|null */
     private ?string $insuranceAgentCode = null;
 
-    /** @var bool */
-    private bool $pickUp = false;
+    /** @var int */
+    private int $pickUp = 1;
 
-    /** @var bool */
-    private bool $delivery = false;
+    /** @var int */
+    private int $delivery = 1;
 
     /** @var string */
     private string $cargoTypeCode = '03';

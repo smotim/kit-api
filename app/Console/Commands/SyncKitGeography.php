@@ -12,9 +12,12 @@ class SyncKitGeography extends Command
     protected $signature = 'kit:sync-geography';
     protected $description = 'Synchronize KIT geography data';
 
-    public function handle()
+    /**
+     * @return void
+     */
+    public function handle(): void
     {
-        UpdateKitGeographyData::dispatch();
-        $this->info('Synchronization job dispatched');
+        UpdateKitGeographyData::dispatchSync();
+        $this->info('Synchronization completed');
     }
 }

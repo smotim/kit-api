@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Repositories;
 
 use App\Models\Terminal;
+use Illuminate\Support\Facades\DB;
 use MongoDB\Collection;
 
 class TerminalRepository
@@ -22,17 +23,17 @@ class TerminalRepository
      */
     public function search(?string $query = null): array
     {
-        $filter = [];
+        $query = $query ?? '';
 
-        if ($query) {
-            $filter['$or'] = [
-                ['city_name' => ['$regex' => $query, '$options' => 'i']],
-                ['address_code' => ['$regex' => $query, '$options' => 'i']]
-            ];
-        }
+        $result = DB::connection('mongodb')
+            ->table('terminals')
+            ->where(function($q) use ($query) {
+                $q->where('city_name', 'like', '%' . $query . '%')
+                    ->orWhere('address_code', 'like', '%' . $query . '%');
+            })
+            ->limit(10)
+            ->get();
 
-        return $this->collection
-            ->find($filter, ['limit' => 10])
-            ->toArray();
+        return $result->toArray();
     }
 }

@@ -11,7 +11,6 @@ class Terminal extends Model
 {
     use HasFactory;
 
-    protected $connection = 'mongodb';
     protected $collection = 'terminals';
 
     protected $fillable = [

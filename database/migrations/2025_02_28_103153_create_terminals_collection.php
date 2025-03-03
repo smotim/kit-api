@@ -14,7 +14,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('terminals', function (Blueprint $table){
-            $table->unique('id');
+            $table->index('id');
             $table->index('geography_city_id');
             $table->index('city_name');
         });

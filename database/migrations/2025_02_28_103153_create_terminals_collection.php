@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use MongoDB\Laravel\Schema\Blueprint;
 
 return new class extends Migration
 {
@@ -11,9 +13,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('terminals_collection', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
+        Schema::create('terminals', function (Blueprint $table){
+            $table->unique('id');
+            $table->index('geography_city_id');
+            $table->index('city_name');
         });
     }
 
@@ -22,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('terminals_collection');
+        Schema::dropIfExists('terminals');
     }
 };

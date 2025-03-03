@@ -25,10 +25,6 @@ class Terminal extends Model
         'email',
         'value',
     ];
-    public function getTable()
-    {
-        return 'terminals_collection'; // Force using this collection name
-    }
 //    public function city()
 //    {
 //        return $this->belongsTo(City::class, 'city_id', 'city_id');

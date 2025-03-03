@@ -20,3 +20,8 @@ bash:
 .PHONY: kit-sync
 kit-sync:
 	docker exec kit_app php artisan kit:sync-geography
+.PHONY: start
+start:
+	$(MAKE) up
+	$(MAKE) bash
+

@@ -12,8 +12,16 @@ rebuild:
 
 .PHONY: install
 install:
-	docker exec laravel_app npm install
+	docker exec kit_app npm install
 
 .PHONY: bash
 bash:
-	docker exec -it laravel_app bash
+	docker exec -it kit_app bash
+.PHONY: kit-sync
+kit-sync:
+	docker exec kit_app php artisan kit:sync-geography
+.PHONY: start
+start:
+	$(MAKE) up
+	$(MAKE) bash
+

@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use MongoDB\Laravel\Eloquent\Model;
+use Illuminate\Database\Eloquent\Model;
 
 class Terminal extends Model
 {
     use HasFactory;
 
-    protected $collection = 'terminals';
+    protected $table = 'terminals';
 
     protected $fillable = [
         'id',
@@ -24,8 +24,4 @@ class Terminal extends Model
         'email',
         'value',
     ];
-//    public function city()
-//    {
-//        return $this->belongsTo(City::class, 'city_id', 'city_id');
-//    }
 }

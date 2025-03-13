@@ -21,25 +21,23 @@ services:
     volumes:
       - .:/var/www/html
     depends_on:
-      - mongodb
+      - redis
     networks:
       - kit-network
       - shared-network
     container_name: kit_app
 
-  mongodb:
-    image: mongo:latest
+  redis:
+    container_name: kit-api-redis
     ports:
-      - "27017:27017"
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: secret
+      - "6379:6379"
+    image: redis:latest
     volumes:
-      - mongodb_data:/data/db
+      - ./data/redis:/data
+    command: redis-server --appendonly yes --requirepass "${REDIS_PASSWORD}"
     networks:
       - kit-network
       - shared-network
-    container_name: kit_mongodb
 
 networks:
   shared-network:
@@ -48,6 +46,3 @@ networks:
   kit-network:
     name: "kit-network"
     driver: bridge
-
-volumes:
-  mongodb_data:

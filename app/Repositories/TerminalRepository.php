@@ -6,10 +6,10 @@ namespace App\Repositories;
 
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Redis;
 
 class TerminalRepository
 {
-    private const CACHE_TTL = 86400; // Cache for 24 hours
     private const CACHE_KEY_PREFIX = 'terminals:';
     private const CACHE_ALL_KEY = 'terminals:all';
 
@@ -54,17 +54,19 @@ class TerminalRepository
      */
     public function cacheTerminals(array $terminals): void
     {
-        Cache::put(self::CACHE_ALL_KEY, $terminals, self::CACHE_TTL);
+        $this->clearCache();
+
+        Cache::forever(self::CACHE_ALL_KEY, $terminals);
 
         foreach ($terminals as $terminal) {
             if (isset($terminal['id'])) {
-                Cache::put(
+                Cache::forever(
                     self::CACHE_KEY_PREFIX . $terminal['id'],
-                    $terminal,
-                    self::CACHE_TTL
+                    $terminal
                 );
             }
         }
+        Log::info('Сохранено ' . count($terminals) . ' терминалов без ограничения времени жизни');
     }
 
     /**
@@ -86,5 +88,14 @@ class TerminalRepository
     public function clearCache(): void
     {
         Cache::forget(self::CACHE_ALL_KEY);
+
+        $prefix = config('cache.prefix') ? config('cache.prefix') . '_' : '';
+        $keys = Redis::keys("{$prefix}cache_" . self::CACHE_KEY_PREFIX . "*");
+
+        foreach ($keys as $key) {
+            Redis::del($key);
+        }
+
+        Log::info('Кеш терминалов полностью очищен, удалено ' . count($keys) . ' ключей');
     }
 }

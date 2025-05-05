@@ -39,7 +39,6 @@ class UpdateKitGeographyData implements ShouldQueue
 
             foreach ($terminals as $terminal) {
                 if (is_object($terminal)) {
-                    // Convert object to array for caching
                     $processedTerminals[] = [
                         'id' => $terminal->id,
                         'geography_city_id' => $terminal->geography_city_id,
@@ -56,10 +55,8 @@ class UpdateKitGeographyData implements ShouldQueue
 
             Log::info('Processed ' . count($processedTerminals) . ' terminals for caching');
 
-            // Store all terminals in cache
             $terminalRepository->cacheTerminals($processedTerminals);
 
-            // Verify data was cached by reading it back
             $cachedCount = count($terminalRepository->getAllTerminals());
             Log::info("Verification: found {$cachedCount} terminals in cache after storing");
 

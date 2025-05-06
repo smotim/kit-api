@@ -4,26 +4,30 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\DTO\CityByCodeDTO;
+use App\DTO\DeliveryCalculationDTO;
+use App\DTO\KitTerminalsRequestDTO;
+use App\DTO\SearchCitiesDTO;
 use App\Services\KitDeliveryService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Psr\Http\Client\ClientExceptionInterface;
 use Symfony\Component\HttpFoundation\Response;
 
 readonly class DeliveryController
 {
     public function __construct(
         private KitDeliveryService $kitService
-    ) {}
+    ) {
+    }
 
     /**
      * @return JsonResponse
-     * @throws ClientExceptionInterface
      */
     public function getAllTerminals(): JsonResponse
     {
         try {
-            $terminals = $this->kitService->getTerminals();
+            $dto = new KitTerminalsRequestDTO();
+            $terminals = $this->kitService->getTerminals($dto);
             return response()->json($terminals, Response::HTTP_OK);
         } catch (\Exception $e) {
             return response()->json([
@@ -35,12 +39,12 @@ readonly class DeliveryController
     /**
      * @param string $cityId
      * @return JsonResponse
-     * @throws ClientExceptionInterface
      */
     public function getCityTerminals(string $cityId): JsonResponse
     {
         try {
-            $terminals = $this->kitService->getTerminals($cityId);
+            $dto = new KitTerminalsRequestDTO($cityId);
+            $terminals = $this->kitService->getTerminals($dto);
             return response()->json($terminals, Response::HTTP_OK);
         } catch (\Exception $e) {
             return response()->json([
@@ -52,12 +56,12 @@ readonly class DeliveryController
     /**
      * @param Request $request
      * @return JsonResponse
-     * @throws ClientExceptionInterface
      */
     public function calculateDelivery(Request $request): JsonResponse
     {
         try {
-            $result = $this->kitService->calculateDelivery($request->all());
+            $dto = DeliveryCalculationDTO::fromArray($request->all());
+            $result = $this->kitService->calculateDelivery($dto);
             return response()->json([
                 'data' => $result
             ], Response::HTTP_OK);
@@ -71,7 +75,6 @@ readonly class DeliveryController
     /**
      * @param Request $request
      * @return JsonResponse
-     * @throws ClientExceptionInterface
      */
     public function searchCities(Request $request): JsonResponse
     {
@@ -82,8 +85,26 @@ readonly class DeliveryController
         }
 
         try {
-            $cities = $this->kitService->searchCitiesByName($request->get('query'));
+            $dto = new SearchCitiesDTO($request->get('query'));
+            $cities = $this->kitService->searchCitiesByName($dto);
             return response()->json($cities, Response::HTTP_OK);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => $e->getMessage()
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * @param string $code
+     * @return JsonResponse
+     */
+    public function getCityByCode(string $code): JsonResponse
+    {
+        try {
+            $dto = new CityByCodeDTO($code);
+            $city = $this->kitService->getCityByCode($dto);
+            return response()->json($city, Response::HTTP_OK);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => $e->getMessage()

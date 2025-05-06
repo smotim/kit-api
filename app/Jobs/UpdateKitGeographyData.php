@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Jobs;
 
+use App\DTO\KitTerminalsRequestDTO;
 use App\Repositories\TerminalRepository;
 use App\Services\KitDeliveryService;
 use Illuminate\Bus\Queueable;
@@ -27,7 +28,8 @@ class UpdateKitGeographyData implements ShouldQueue
 
             $start = microtime(true);
 
-            $terminals = $kitService->getTerminals();
+            $dto = new KitTerminalsRequestDTO();
+            $terminals = $kitService->getTerminals($dto);
             Log::info('Retrieved ' . count($terminals) . ' terminals from API');
 
             if (count($terminals) === 0) {

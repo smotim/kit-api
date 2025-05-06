@@ -4,20 +4,25 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\DTO\CityByCodeDTO;
 use App\DTO\DeliveryCalculationDTO;
+use App\DTO\KitTerminalsRequestDTO;
+use App\DTO\SearchCitiesDTO;
 use Exception;
 use InvalidArgumentException;
 use service\KitAPI\Factory\SimpleClientFactory;
 use service\KitAPI\Interfaces\ApiExceptionInterface;
 use service\KitAPI\Interfaces\ClientExceptionInterface;
+use service\KitAPI\KitAPIClient;
 use service\KitAPI\Model\Entity\Order\CalculateResult;
-use service\KitAPI\Model\Request\Geography\GetListAddressRequest;
+use service\KitAPI\Model\Response\Geography\GetListCityResponse;
+use service\KitAPI\Model\Response\Order\GetListServiceResponse;
 use service\KitAPI\Model\Response\Tdd\SearchByNameResponse;
 use Symfony\Component\HttpFoundation\Response;
 
 class KitDeliveryService
 {
-    private \service\KitAPI\KitAPIClient $client;
+    private KitAPIClient $client;
 
     public function __construct()
     {
@@ -25,20 +30,16 @@ class KitDeliveryService
     }
 
     /**
-     * Get terminals in city
+     * Get terminals in the city
      *
-     * @param string|null $cityId
+     * @param KitTerminalsRequestDTO $dto
      * @return array
-     * @throws \Psr\Http\Client\ClientExceptionInterface
      * @throws Exception
      */
-    public function getTerminals(string $cityId = null): array
+    public function getTerminals(KitTerminalsRequestDTO $dto): array
     {
         try {
-            $request = $cityId
-                ? new GetListAddressRequest($cityId, true, true)
-                : new GetListAddressRequest(withPhone: true, withEmail: true);
-            $response = $this->client->geography->getListAddress($request);
+            $response = $this->client->geography->getListAddress($dto->toGetListAddressRequest());
             return $response->addreses;
         } catch (ApiExceptionInterface | ClientExceptionInterface $e) {
             throw new Exception('Failed to get terminals: ' . $e->getMessage());
@@ -48,30 +49,28 @@ class KitDeliveryService
     /**
      * Calculate delivery cost
      *
-     * @param array $data
+     * @param DeliveryCalculationDTO $dto
      * @return CalculateResult
-     * @throws \Psr\Http\Client\ClientExceptionInterface
+     * @throws Exception
      */
-    public function calculateDelivery(array $data): CalculateResult
+    public function calculateDelivery(DeliveryCalculationDTO $dto): CalculateResult
     {
         try {
-            $dto = DeliveryCalculationDTO::fromArray($data);
-            $request = $dto->toCalculateRequest();
-            $response = $this->client->order->calculate($request);
-            return $response->getResult();
+            return $this->client->order->calculate($dto->toCalculateRequest())->getResult();
         } catch (InvalidArgumentException $e) {
-            throw new \Exception($e->getMessage(), Response::HTTP_UNPROCESSABLE_ENTITY);
+            throw new Exception($e->getMessage(), Response::HTTP_UNPROCESSABLE_ENTITY);
         } catch (ApiExceptionInterface | ClientExceptionInterface $e) {
-            throw new \Exception('Failed to calculate delivery: ' . $e->getMessage(), Response::HTTP_BAD_GATEWAY);
+            throw new Exception('Failed to calculate delivery: ' . $e->getMessage(), Response::HTTP_BAD_GATEWAY);
         }
     }
 
     /**
-     * Get list of countries
+     * Get a list of countries
      *
-     * @throws Exception|\Psr\Http\Client\ClientExceptionInterface
+     * @return GetListServiceResponse
+     * @throws Exception
      */
-    public function getServicesList(): \service\KitAPI\Model\Response\Order\GetListServiceResponse
+    public function getServicesList(): GetListServiceResponse
     {
         try {
             return $this->client->order->getListService();
@@ -83,15 +82,30 @@ class KitDeliveryService
     /**
      * Search cities by name
      *
-     * @param string $title
+     * @param SearchCitiesDTO $dto
      * @return SearchByNameResponse
-     * @throws \Psr\Http\Client\ClientExceptionInterface
+     * @throws Exception
      */
-    public function searchCitiesByName(string $title): \service\KitAPI\Model\Response\Tdd\SearchByNameResponse
+    public function searchCitiesByName(SearchCitiesDTO $dto): SearchByNameResponse
     {
         try {
-            $request = new \service\KitAPI\Model\Request\Tdd\SearchByNameRequest($title);
-            return $this->client->tdd->searchByName($request);
+            return $this->client->tdd->searchByName($dto->toSearchByNameRequest());
+        } catch (ApiExceptionInterface | ClientExceptionInterface $e) {
+            throw new Exception('Failed to search cities: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Get City by Code
+     *
+     * @param CityByCodeDTO $dto
+     * @return GetListCityResponse
+     * @throws Exception
+     */
+    public function getCityByCode(CityByCodeDTO $dto): GetListCityResponse
+    {
+        try {
+            return $this->client->geography->getListCity($dto->toGetListCityRequest());
         } catch (ApiExceptionInterface | ClientExceptionInterface $e) {
             throw new Exception('Failed to search cities: ' . $e->getMessage());
         }

@@ -29,7 +29,7 @@ class TerminalRepository
 
         $allTerminals = $this->getAllTerminals();
 
-        return array_filter($allTerminals, function($terminal) use ($query) {
+        return array_filter($allTerminals, function ($terminal) use ($query) {
             $query = strtolower($query);
             return stripos(strtolower($terminal['city_name'] ?? ''), $query) !== false ||
                    stripos(strtolower($terminal['address_code'] ?? ''), $query) !== false;

@@ -96,13 +96,13 @@ readonly class DeliveryController
     }
 
     /**
-     * @param string $code
+     * @param int $tdd_city_code
      * @return JsonResponse
      */
-    public function getCityByCode(string $code): JsonResponse
+    public function getCityByCode(int $tdd_city_code): JsonResponse
     {
         try {
-            $dto = new CityByCodeDTO($code);
+            $dto = new CityByCodeDTO($tdd_city_code);
             $city = $this->kitService->getCityByCode($dto);
             return response()->json($city, Response::HTTP_OK);
         } catch (\Exception $e) {

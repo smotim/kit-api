@@ -20,24 +20,10 @@ services:
       dockerfile: docker/app.dockerfile
     volumes:
       - .:/var/www/html
-    depends_on:
-      - redis
     networks:
       - kit-network
       - shared-network
     container_name: kit_app
-
-  redis:
-    container_name: kit-api-redis
-    ports:
-      - "6379:6379"
-    image: redis:latest
-    volumes:
-      - ./data/redis:/data
-    command: redis-server --appendonly yes --requirepass "${REDIS_PASSWORD}"
-    networks:
-      - kit-network
-      - shared-network
 
 networks:
   shared-network:

@@ -17,9 +17,6 @@ install:
 .PHONY: bash
 bash:
 	docker exec -it kit_app bash
-.PHONY: kit-sync
-kit-sync:
-	docker exec kit_app php artisan kit:sync-geography
 .PHONY: start
 start:
 	$(MAKE) up

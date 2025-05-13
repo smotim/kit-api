@@ -6,7 +6,6 @@ namespace App\Services;
 
 use App\DTO\CityByCodeDTO;
 use App\DTO\DeliveryCalculationDTO;
-use App\DTO\KitTerminalsRequestDTO;
 use App\DTO\SearchCitiesDTO;
 use Exception;
 use InvalidArgumentException;
@@ -15,6 +14,7 @@ use service\KitAPI\Interfaces\ApiExceptionInterface;
 use service\KitAPI\Interfaces\ClientExceptionInterface;
 use service\KitAPI\KitAPIClient;
 use service\KitAPI\Model\Entity\Order\CalculateResult;
+use service\KitAPI\Model\Request\Geography\GetListAddressRequest;
 use service\KitAPI\Model\Response\Geography\GetListCityResponse;
 use service\KitAPI\Model\Response\Order\GetListServiceResponse;
 use service\KitAPI\Model\Response\Tdd\SearchByNameResponse;
@@ -32,14 +32,24 @@ class KitDeliveryService
     /**
      * Get terminals in the city
      *
-     * @param KitTerminalsRequestDTO $dto
+     * @param GetListAddressRequest $request
      * @return array
-     * @throws Exception
+     * @throws \Psr\Http\Client\ClientExceptionInterface
      */
-    public function getTerminals(KitTerminalsRequestDTO $dto): array
+    /**
+     * Get terminals in the city
+     *
+     * @param string|null $geography_city_id
+     * @param bool $withPhone
+     * @param bool $withEmail
+     * @return array
+     * @throws \Psr\Http\Client\ClientExceptionInterface
+     */
+    public function getTerminals(?string $geography_city_id = null, bool $withPhone = false, bool $withEmail = false)
     {
+        $request = new GetListAddressRequest($geography_city_id, $withPhone, $withEmail);
         try {
-            $response = $this->client->geography->getListAddress($dto->toGetListAddressRequest());
+            $response = $this->client->geography->getListAddress($request);
             return $response->addreses;
         } catch (ApiExceptionInterface | ClientExceptionInterface $e) {
             throw new Exception('Failed to get terminals: ' . $e->getMessage());
@@ -61,21 +71,6 @@ class KitDeliveryService
             throw new Exception($e->getMessage(), Response::HTTP_UNPROCESSABLE_ENTITY);
         } catch (ApiExceptionInterface | ClientExceptionInterface $e) {
             throw new Exception('Failed to calculate delivery: ' . $e->getMessage(), Response::HTTP_BAD_GATEWAY);
-        }
-    }
-
-    /**
-     * Get a list of countries
-     *
-     * @return GetListServiceResponse
-     * @throws Exception
-     */
-    public function getServicesList(): GetListServiceResponse
-    {
-        try {
-            return $this->client->order->getListService();
-        } catch (ApiExceptionInterface | ClientExceptionInterface $e) {
-            throw new Exception('Failed to get services list: ' . $e->getMessage());
         }
     }
 

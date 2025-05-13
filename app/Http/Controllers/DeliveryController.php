@@ -6,7 +6,6 @@ namespace App\Http\Controllers;
 
 use App\DTO\CityByCodeDTO;
 use App\DTO\DeliveryCalculationDTO;
-use App\DTO\KitTerminalsRequestDTO;
 use App\DTO\SearchCitiesDTO;
 use App\Services\KitDeliveryService;
 use Illuminate\Http\JsonResponse;
@@ -21,35 +20,20 @@ readonly class DeliveryController
     }
 
     /**
+     * @param Request $request
      * @return JsonResponse
      */
-    public function getAllTerminals(): JsonResponse
+    public function getTerminals(Request $request): JsonResponse
     {
-        try {
-            $dto = new KitTerminalsRequestDTO();
-            $terminals = $this->kitService->getTerminals($dto);
-            return response()->json($terminals, Response::HTTP_OK);
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => $e->getMessage()
-            ], Response::HTTP_UNPROCESSABLE_ENTITY);
-        }
-    }
+        $geography_city_id = $request->input('geography_city_id');
+        $withPhone = filter_var($request->input('withPhone', false), FILTER_VALIDATE_BOOLEAN);
+        $withEmail = filter_var($request->input('withEmail', false), FILTER_VALIDATE_BOOLEAN);
 
-    /**
-     * @param string $cityId
-     * @return JsonResponse
-     */
-    public function getCityTerminals(string $cityId): JsonResponse
-    {
         try {
-            $dto = new KitTerminalsRequestDTO($cityId);
-            $terminals = $this->kitService->getTerminals($dto);
+            $terminals = $this->kitService->getTerminals($geography_city_id, $withPhone, $withEmail);
             return response()->json($terminals, Response::HTTP_OK);
         } catch (\Exception $e) {
-            return response()->json([
-                'message' => $e->getMessage()
-            ], Response::HTTP_UNPROCESSABLE_ENTITY);
+            return response()->json(['message' => $e->getMessage()], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
     }
 
